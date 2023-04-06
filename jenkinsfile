@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('check dir abd make dir') {
+            steps{ 
+                sh 'ls -al'
+                sh 'mkdir -p copy'
+            }
+        }
+        stage('deploy to s3'){
+            steps{
+                sh 'aws s3 cp . s3://mybucket1004 --recursive'
+                sh 'aws s3 cp s3://mybucket1004/hello.txt copy/. '
+            }
+        }
+        stage("read file"){
+            steps{
+                sh 'cat hello.txt'
+            }
+        }
+    }
+}
