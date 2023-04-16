@@ -4,3 +4,5 @@ resource "aws_instance" "web" {
     subnet_id = "subnet-0d437a12f81c01aad"
     key_name = "key-north-virginia"
 }
+
+//terraform import aws_instance.web (instance_id)
