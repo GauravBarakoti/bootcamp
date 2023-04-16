@@ -1,0 +1,6 @@
+resource "aws_instance" "web" {
+    instance_type = "t2.micro"
+    ami ="ami-007855ac798b5175e"
+    subnet_id = "subnet-0d437a12f81c01aad"
+    key_name = "key-north-virginia"
+}
