@@ -1,25 +1,9 @@
 #!/bin/bash
 
-echo "Enter the path to the source directory:"
-read src_dir
+instance_ids=$(aws ec2 describe-instances --query'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0]]' --output text | awk '{print$1}')
 
-
-echo "Enter the path to the destination directory for files:"
-read dest_file_dir
-echo "Enter the path to the destination directory for directories:"
-read dest_dir_dir
-
-for item in "$src_dir"/*
+for instance_id in $instance_ids
 do
-    if [ -d "$item" ]
-    then
-        # Item is a directory
-        mv "$item" "$dest_dir_dir"
-    else
-        # Item is a file
-        mv "$item" "$dest_file_dir"
-    fi
+	private_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query'Reservations[*].Instances[*].PrivateIpAddress' --output text)state=$(aws ec2 describe-instances --instance-ids $instance_id --query'Reservations[*].Instances[*].State.Name' --output text)
+	echo "Instance ID: $instance_id, Private IP: $private_ip, State: $state"
 done
-
-echo "All files and directories have been successfully moved."
-

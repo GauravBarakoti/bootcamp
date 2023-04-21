@@ -1,30 +1,27 @@
 #!/bin/bash
 
-uid_sum=0
-gid_sum=0
-
-while read line
-do
-
-    uid=$(echo $line | cut -d: -f3)
-    gid=$(echo $line | cut -d: -f4)
+region="us-east-1"
 
 
-    uid_sum=$((uid_sum + uid))
-    gid_sum=$((gid_sum + gid))
-done < "/etc/passwd"
+read -p "Enter the EC2 Instance ID: " instance_id
 
-echo "Sum of UIDs: $uid_sum"
-echo "Sum of GIDs: $gid_sum"
 
-if [ $uid_sum -gt $gid_sum ]
+termination_protection=$(aws ec2 describe-instances --instance-ids $instance_id --query"Reservations[*].Instances[*].InstanceLifecycle" --region $region --output text)
+
+if [ "$termination_protection" == "spot" ]
 then
-    echo "Sum of UIDs is greater."
-elif [ $uid_sum -lt $gid_sum ]
-then
-    echo "Sum of GIDs is greater."
+
+	echo "The EC2 instance is a Spot Instance and cannot have termination protection enabled."
 else
-    echo "Sum of UIDs and GIDs are equal."
-fi
 
-~
+	termination_protection_enabled=$(aws ec2 describe-instance-attribute --instance-id $instance_id --attribute disableApiTermination --query "DisableApiTermination.Value" --region $region --output
+text)
+if [ "$termination_protection_enabled" == "true" ]
+then
+
+	echo "Termination protection is enabled for EC2 Instance $instance_id."
+else
+
+	echo "Termination protection is not enabled for EC2 Instance $instance_id."
+fi
+fi
